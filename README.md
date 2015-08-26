@@ -147,6 +147,28 @@ public class SampleEnvironment extends Environment {
 }
 ```
 
+## Executing your Environments
+
+The only thing you have to do is get an EnvironmentExecutor and execute!
+
+```java
+public class Sample {
+
+   @Test
+   public void method() {
+      EnvironmentExecutor.gimme().execute(EnvironmentSample.class); //It expects the method EnvironmentSample.run() to be implemented
+	  org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+   
+   @Test
+   public void method2() {
+      EnvironmentExecutor.gimme().execute(EnvironmentSample.class, "environmentSampleMethodName"); //It expects to exists the method EnvironmentSample.environmentSampleMethodName()
+	  org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+
+}
+```
+
 ## You must also see
 
 * *_[Environment JUnit](https://github.com/angeliferreira/environment-junit)_*
