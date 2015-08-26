@@ -171,6 +171,9 @@ public class Sample {
 
 ## You must also see
 
+REMEMBER, TESTS ARE DOCUMENTATION
+
+* *_[Environment Example Tests](https://github.com/angeliferreira/environment/tree/master/src/test/java/br/com/lemao/environment/test)_*
 * *_[Environment JUnit](https://github.com/angeliferreira/environment-junit)_*
 * *_[SimulaTest - Simulatest Test Harness Framework](https://github.com/gabrielsuch/simulatest)_*
 * *_[Fixture Factory](https://github.com/six2six/fixture-factory)_*
