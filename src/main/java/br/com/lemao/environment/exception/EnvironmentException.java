@@ -7,14 +7,15 @@ public class EnvironmentException extends RuntimeException {
 	private static final long serialVersionUID = -3711300800387484490L;
 	
 	public EnvironmentException(Class<?> environmentClass, String environmentName, Exception e) {
-		super(getMessage(null, environmentClass, environmentName), e);
+		super(getMessage(null, environmentClass, environmentName, e), e);
 	}
 	
 	public EnvironmentException(String simpleMessage, Class<?> environmentClass, String environmentName, Exception e) {
-		super(getMessage(simpleMessage, environmentClass, environmentName), e);
+		super(getMessage(simpleMessage, environmentClass, environmentName, e), e);
 	}
 
-	static String getMessage(String simpleMessage, Class<?> environmentClass,	String environmentName) {
+	static String getMessage(String simpleMessage, Class<?> environmentClass, String environmentName, Exception e) {
+		if (e.getCause() != null) return e.getCause().getMessage();
 		return getSimpleMessageOrDefault(simpleMessage) + " >> " + environmentClass.getName() + "." + environmentName;
 	}
 
