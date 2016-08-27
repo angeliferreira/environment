@@ -13,7 +13,10 @@ import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
 
 public class EnvironmentExecutor {
 	
-	private EnvironmentExecutor() {
+	private EnvironmentExecutor() {}
+	
+	public static EnvironmentExecutor gimme() {
+		return new EnvironmentExecutor();
 	}
 	
 	public void execute(GivenEnvironment givenEnvironment) {
@@ -61,10 +64,6 @@ public class EnvironmentExecutor {
 	
 	private Environment getEnvironmentInstance(Class<? extends Environment> environmentClass) throws InstantiationException, IllegalAccessException {
 		return (Environment) environmentClass.newInstance();
-	}
-
-	public static EnvironmentExecutor gimme() {
-		return new EnvironmentExecutor();
 	}
 
 }

@@ -7,7 +7,7 @@ public abstract class Environment {
 	public static final String DEFAULT_ENVIRONMENT_METHOD_NAME = "run";
 
 	public void run() {
-		throw new EnvironmentNotImplementedException(getClass(), DEFAULT_ENVIRONMENT_METHOD_NAME, null);
+		throw new EnvironmentNotImplementedException(getClass(), DEFAULT_ENVIRONMENT_METHOD_NAME);
 	}
 
 	public void beforeRun() {
