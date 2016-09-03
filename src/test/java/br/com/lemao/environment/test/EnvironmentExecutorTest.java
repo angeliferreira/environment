@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Test;
 
 import br.com.lemao.environment.environments.BikerEnvironment;
@@ -20,6 +21,12 @@ import br.com.lemao.environment.model.biker.support.BikerInMemorySupport;
 import br.com.lemao.environment.model.gender.Gender;
 
 public class EnvironmentExecutorTest {
+	
+	@After
+	public void dropObjects() {
+		BikerInMemorySupport.dropObjects();
+		BicycleInMemorySupport.dropObjects();
+	}
 
 	@Test
 	public void oneBikerAndOneBicycleForThisBikerCreatedByEnvironment() {
@@ -39,9 +46,6 @@ public class EnvironmentExecutorTest {
 		assertThat(bicycle.getModelName(), is("S-WORKS EPIC 29"));
 		assertThat(bicycle.getSerialNumber(), is(165487L));
 		assertThat(bicycle.getOwner(), is(biker));
-		
-		BikerInMemorySupport.dropObjects();
-		BicycleInMemorySupport.dropObjects();
 	}
 	
 	@Test
@@ -66,9 +70,6 @@ public class EnvironmentExecutorTest {
 		assertThat(bicycle.getModelName(), is("S-WORKS EPIC 29"));
 		assertThat(bicycle.getSerialNumber(), is(165487L));
 		assertThat(bicycle.getOwner(), is(lemaoBiker));
-		
-		BikerInMemorySupport.dropObjects();
-		BicycleInMemorySupport.dropObjects();
 	}
 	
 	@Test
@@ -85,9 +86,6 @@ public class EnvironmentExecutorTest {
 		Biker maricotinhaBiker = BikerInMemorySupport.findByName("Maria Maricotinha");
 		assertThat(maricotinhaBiker.getGender(), is(Gender.FEMALE));
 		assertThat(maricotinhaBiker.getName(), is("Maria Maricotinha"));
-		
-		BikerInMemorySupport.dropObjects();
-		BicycleInMemorySupport.dropObjects();
 	}
 	
 	@Test
@@ -117,9 +115,6 @@ public class EnvironmentExecutorTest {
 		assertThat(allezBicycle.getModelName(), is("S-WORKS ALLEZ DI2"));
 		assertThat(allezBicycle.getSerialNumber(), is(98657L));
 		assertThat(allezBicycle.getOwner(), is(maricotinhaBiker));
-		
-		BikerInMemorySupport.dropObjects();
-		BicycleInMemorySupport.dropObjects();
 	}
 	
 	@Test
@@ -165,9 +160,6 @@ public class EnvironmentExecutorTest {
 		assertThat(allezBicycle.getModelName(), is("S-WORKS ALLEZ DI2"));
 		assertThat(allezBicycle.getSerialNumber(), is(98657L));
 		assertThat(allezBicycle.getOwner(), is(maricotinhaBiker));
-		
-		BikerInMemorySupport.dropObjects();
-		BicycleInMemorySupport.dropObjects();
 	}
 
 }

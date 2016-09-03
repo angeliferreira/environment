@@ -36,7 +36,7 @@ public class EnvironmentExecutor {
 			
 			beforeRun(environmentClass, environmentName);
 			
-			environmentMethod.invoke(environmentClass.newInstance());
+			environmentMethod.invoke(getEnvironmentInstance(environmentClass));
 		} catch (NoSuchMethodException e) {
 			throw new EnvironmentNotImplementedException(environmentClass, environmentName, e);
 		} catch (Exception e) {
@@ -46,7 +46,7 @@ public class EnvironmentExecutor {
 		}
 	}
 	
-	private void beforeRun(Class<? extends Environment> environmentClass, String environmentName) throws InstantiationException, IllegalAccessException {
+	private void beforeRun(Class<? extends Environment> environmentClass, String environmentName) {
 		try {
 			getEnvironmentInstance(environmentClass).beforeRun();
 		} catch (Exception e) {
