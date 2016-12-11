@@ -14,8 +14,8 @@ public class EnvironmentException extends RuntimeException {
 		super(getMessage(simpleMessage, environmentClass, environmentName), e);
 	}
 
-	public EnvironmentException(Class<?> environmentClass) {
-		super(getMessage(MESSAGE_ERROR_TRYING_TO_RUN_ENVIRONMENT, environmentClass));
+	public EnvironmentException(String simpleMessage, Class<?> environmentClass) {
+		super(getMessage(simpleMessage, environmentClass));
 	}
 
 	private static String getMessage(String simpleMessage, Class<?> environmentClass) {

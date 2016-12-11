@@ -44,7 +44,7 @@ public class EnvironmentExecutor {
 			environmentMethod.invoke(getEnvironmentInstance(environmentClass));
 		} catch (NoSuchMethodException e) {
 			throw new EnvironmentNotImplementedException(environmentClass, environmentName, e);
-		} catch (BeforeEnvironmentException e) {
+		} catch (EnvironmentException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new EnvironmentException(environmentClass, environmentName, e);
