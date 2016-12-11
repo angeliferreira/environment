@@ -142,34 +142,39 @@ public class SampleEnvironment extends Environment {
 
 ## Creating Environments hierarchically
 
-It is possible to build a structure of hierarchical environments. You only need annotate the Environment method with @GivenEnvironment passing the Environment you want as a parent.
+It is possible to build a structure of hierarchical environments. You only need annotate the Environment method with *@GivenEnvironment* passing the Environment you want as a parent.
 
 ### @GivenEnvironment annotation
 
-The annotation @GivenEnvironment tells which structure will be executed before the method.
+The use of the Environment is through *@GivenEnvironment* annotation. Its name was not given lightly, it was thought to lead naturally to the concept of *_[BDD](http://en.wikipedia.org/wiki/Behavior-driven_development)_* (_behavior driven development_) in which case it would be the abstraction of what you need to have as initial structure for your test.
+
+The annotation @GivenEnvironment tells which structure will be executed before the test method. In the case of the annotation be in a test class, all tests that are NOT annotated with *@GivenEnvironment* or *@IgnoreEnvironment* will be executed after the execution of the Environment structure.
 
 The GivenEnvironment annotation supports two basic uses.
 
 The first use you only have to pass as parameter the Environment class which has a run() method, structure Environment per class.
 
-Its use in a Structure of environment per class would be as follows:
+Its use in a test case would be as follows:
 
 ```java
-public class SampleEnvironmentOneSample extends Environment {
+public class Sample {
 
-   @Override
-   public void run() {
-      SampleUtil.createSample();
+   @Test
+   @GivenEnvironment(EnvironmentSample.class)
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
    }
 
 }
+```
+or 
+```java
+@GivenEnvironment(EnvironmentSample.class)
+public class Sample {
 
-public class SampleEnvironment3Samples extends Environment {
-
-   @Override
-   @GivenEnvironment(SampleEnvironmentOneSample.class)
-   public void run() {
-      SampleUtil.create2Samples();
+   @Test
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
    }
 
 }
@@ -177,18 +182,27 @@ public class SampleEnvironment3Samples extends Environment {
 
 The second use you have to pass as parameter the Environment class and the Environment method, structure Environment per method.
 
-Its use in a Structure of environment per method would be as follows:
+Its use in a test case would be as follows:
 
 ```java
-public class SampleEnvironment extends Environment {
+public class Sample {
 
-   public void myEnvironmentMethodNameOneSample() {
-      SampleUtil.createSample();
+   @Test
+   @GivenEnvironment(value=EnvironmentSample.class, environmentName="myEnvironmentMethodNameOneSample")
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
    }
 
-   @GivenEnvironment(value=EnvironmentSample.class, environmentName="myEnvironmentMethodNameOneSample")
-   public void myEnvironmentMethodName3Samples() {
-      SampleUtil.create2Samples();
+}
+```
+or
+```java
+@GivenEnvironment(value=EnvironmentSample.class, environmentName="myEnvironmentMethodNameOneSample")
+public class Sample {
+
+   @Test
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
    }
 
 }
