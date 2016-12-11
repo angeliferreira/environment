@@ -148,7 +148,7 @@ It is possible to build a structure of hierarchical environments. You only need 
 
 The use of the Environment is through *@GivenEnvironment* annotation. Its name was not given lightly, it was thought to lead naturally to the concept of *_[BDD](http://en.wikipedia.org/wiki/Behavior-driven_development)_* (_behavior driven development_) in which case it would be the abstraction of what you need to have as initial structure for your test.
 
-The annotation @GivenEnvironment tells which structure will be executed before the test method. In the case of the annotation be in a test class, all tests that are NOT annotated with *@GivenEnvironment* or *@IgnoreEnvironment* will be executed after the execution of the Environment structure.
+The annotation *@GivenEnvironment* tells which structure will be executed before the test method. In the case of the annotation be in a test class, all tests that are NOT annotated with *@GivenEnvironment* or *@IgnoreEnvironment* will be executed after the execution of the Environment structure.
 
 The GivenEnvironment annotation supports two basic uses.
 
