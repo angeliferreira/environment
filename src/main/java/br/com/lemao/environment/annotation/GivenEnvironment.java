@@ -7,13 +7,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import br.com.lemao.environment.Environment;
-
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface GivenEnvironment {
 
-	Class<? extends Environment> value();
+	Class<?> value();
 
 	String environmentName() default DEFAULT_ENVIRONMENT_METHOD_NAME;
 

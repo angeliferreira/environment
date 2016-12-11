@@ -2,13 +2,17 @@ package br.com.lemao.environment.executor;
 
 import static br.com.lemao.environment.Environment.DEFAULT_ENVIRONMENT_METHOD_NAME;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import br.com.lemao.environment.Environment;
+import br.com.lemao.environment.annotation.AfterEnvironment;
+import br.com.lemao.environment.annotation.BeforeEnvironment;
 import br.com.lemao.environment.annotation.GivenEnvironment;
 import br.com.lemao.environment.exception.AfterEnvironmentException;
 import br.com.lemao.environment.exception.BeforeEnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentException;
+import br.com.lemao.environment.exception.EnvironmentHierarchyException;
 import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
 
 public class EnvironmentExecutor {
@@ -23,11 +27,12 @@ public class EnvironmentExecutor {
 		execute(givenEnvironment.value(), givenEnvironment.environmentName());
 	}
 	
-	public void execute(Class<? extends Environment> environmentClass) {
+	public void execute(Class<?> environmentClass) {
 		execute(environmentClass, DEFAULT_ENVIRONMENT_METHOD_NAME);
 	}
 
-	public void execute(Class<? extends Environment> environmentClass, String environmentName) {
+	public void execute(Class<?> environmentClass, String environmentName) {
+		validateEnvironmentHierarchy(environmentClass);
 		try {
 			Method environmentMethod = environmentClass.getMethod(environmentName);
 
@@ -39,6 +44,8 @@ public class EnvironmentExecutor {
 			environmentMethod.invoke(getEnvironmentInstance(environmentClass));
 		} catch (NoSuchMethodException e) {
 			throw new EnvironmentNotImplementedException(environmentClass, environmentName, e);
+		} catch (BeforeEnvironmentException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new EnvironmentException(environmentClass, environmentName, e);
 		} finally {
@@ -46,24 +53,59 @@ public class EnvironmentExecutor {
 		}
 	}
 	
-	private void beforeRun(Class<? extends Environment> environmentClass, String environmentName) {
+	private void validateEnvironmentHierarchy(Class<?> environmentClass) {
+		if (!extendsEnvironment(environmentClass) && !isAnnotationPresent(environmentClass, br.com.lemao.environment.annotation.Environment.class)) {
+			throw new EnvironmentHierarchyException(environmentClass);
+		}
+	}
+
+	private boolean isAnnotationPresent(Class<?> environmentClass, Class<? extends Annotation> annotationClass) {
+		if (environmentClass == null) {
+			return false;
+		}
+		return environmentClass.isAnnotationPresent(annotationClass) || isAnnotationPresent(environmentClass.getSuperclass(), annotationClass);
+	}
+
+	private boolean extendsEnvironment(Class<?> environmentClass) {
+		return Environment.class.isAssignableFrom(environmentClass);
+	}
+
+	private void beforeRun(Class<?> environmentClass, String environmentName) {
+		BeforeEnvironment beforeEnvironment = null;
 		try {
-			getEnvironmentInstance(environmentClass).beforeRun();
+			if (extendsEnvironment(environmentClass)) {
+				((Environment) getEnvironmentInstance(environmentClass)).beforeRun();
+			} else if (isAnnotationPresent(environmentClass, BeforeEnvironment.class)) {
+				beforeEnvironment = environmentClass.getAnnotation(BeforeEnvironment.class);
+				Method environmentMethod = environmentClass.getMethod(beforeEnvironment.value());
+				environmentMethod.invoke(getEnvironmentInstance(environmentClass));
+			}
+		} catch (NoSuchMethodException e) {
+			throw new BeforeEnvironmentException(environmentClass, beforeEnvironment.value(), e);
 		} catch (Exception e) {
 			throw new BeforeEnvironmentException(environmentClass, environmentName, e);
 		}
 	}
 	
-	private void afterRun(Class<? extends Environment> environmentClass, String environmentName) {
+	private void afterRun(Class<?> environmentClass, String environmentName) {
+		AfterEnvironment afterEnvironment = null;
 		try {
-			getEnvironmentInstance(environmentClass).afterRun();
+			if (extendsEnvironment(environmentClass)) {
+				((Environment) getEnvironmentInstance(environmentClass)).afterRun();
+			} else if (isAnnotationPresent(environmentClass, AfterEnvironment.class)) {
+				afterEnvironment = environmentClass.getAnnotation(AfterEnvironment.class);
+				Method environmentMethod = environmentClass.getMethod(afterEnvironment.value());
+				environmentMethod.invoke(getEnvironmentInstance(environmentClass));
+			}
+		} catch (NoSuchMethodException e) {
+			throw new AfterEnvironmentException(environmentClass, afterEnvironment.value(), e);
 		} catch (Exception e) {
 			throw new AfterEnvironmentException(environmentClass, environmentName, e);
 		}
 	}
 	
-	private Environment getEnvironmentInstance(Class<? extends Environment> environmentClass) throws InstantiationException, IllegalAccessException {
-		return (Environment) environmentClass.newInstance();
+	private Object getEnvironmentInstance(Class<?> environmentClass) throws InstantiationException, IllegalAccessException {
+		return environmentClass.newInstance();
 	}
 
 }

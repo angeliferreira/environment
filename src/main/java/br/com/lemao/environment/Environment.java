@@ -2,6 +2,7 @@ package br.com.lemao.environment;
 
 import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
 
+@br.com.lemao.environment.annotation.Environment
 public abstract class Environment {
 
 	public static final String DEFAULT_ENVIRONMENT_METHOD_NAME = "run";
