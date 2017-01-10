@@ -2,7 +2,9 @@
   <img src="https://github.com/angeliferreira/environment/blob/master/environment.jpg?raw=true"/>
 </p>
 
-# environment [![Build Status](https://travis-ci.org/angeliferreira/environment.png?branch=master)](https://travis-ci.org/angeliferreira/environment)
+# environment 
+[![Build Status](https://travis-ci.org/angeliferreira/environment.png?branch=master)](https://travis-ci.org/angeliferreira/environment)
+[![codecov](https://codecov.io/gh/angeliferreira/environment/branch/master/graphs/badge.svg)](https://codecov.io/gh/angeliferreira/environment)
 
 Environment is a basic project for running set ups before running each Java automated test.
 
