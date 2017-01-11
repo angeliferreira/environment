@@ -5,11 +5,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
 
+import br.com.lemao.environment.Environment;
+import br.com.lemao.environment.annotation.GivenEnvironment;
 import br.com.lemao.environment.environments.BikerEnvironment;
 import br.com.lemao.environment.environments.OneMaleBikerAndOneBicycleForThisBiker;
 import br.com.lemao.environment.environments.TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBiker;
@@ -48,6 +51,26 @@ public class EnvironmentExecutorTest {
 		assertThat(bicycle.getOwner(), is(biker));
 	}
 	
+	@Test
+	public void oneBikerAndOneBicycleForThisBikerCreatedByGivenEnvironmentAnnotation() {
+		EnvironmentExecutor.gimme().execute(getAnnotationForOneMaleBikerAndOneBicycleForThisBiker());
+		
+		List<Biker> bikers = BikerInMemorySupport.findAll();
+		assertThat(bikers.size(), is(1));
+		
+		Biker biker = bikers.get(0);
+		assertThat(biker.getGender(), is(Gender.MALE));
+		assertThat(biker.getName(), is("Lemão"));
+		
+		List<Bicycle> bicycles = BicycleInMemorySupport.findAll();
+		assertThat(bicycles.size(), is(1));
+		
+		Bicycle bicycle = bicycles.get(0);
+		assertThat(bicycle.getModelName(), is("S-WORKS EPIC 29"));
+		assertThat(bicycle.getSerialNumber(), is(165487L));
+		assertThat(bicycle.getOwner(), is(biker));
+	}
+
 	@Test
 	public void twoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBikerCreatedByEnvironment() {
 		EnvironmentExecutor.gimme().execute(TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBiker.class);
@@ -160,6 +183,22 @@ public class EnvironmentExecutorTest {
 		assertThat(allezBicycle.getModelName(), is("S-WORKS ALLEZ DI2"));
 		assertThat(allezBicycle.getSerialNumber(), is(98657L));
 		assertThat(allezBicycle.getOwner(), is(maricotinhaBiker));
+	}
+	
+	private GivenEnvironment getAnnotationForOneMaleBikerAndOneBicycleForThisBiker() {
+		GivenEnvironment oneMaleBikerAndOneBicycleForThisBiker =
+		new GivenEnvironment() {
+			public Class<? extends Annotation> annotationType() {
+				return GivenEnvironment.class;
+			}
+			public Class<?> value() {
+				return OneMaleBikerAndOneBicycleForThisBiker.class;
+			}
+			public String environmentName() {
+				return Environment.DEFAULT_ENVIRONMENT_METHOD_NAME;
+			}
+		};
+		return oneMaleBikerAndOneBicycleForThisBiker;
 	}
 
 }
