@@ -8,7 +8,11 @@ import static org.junit.Assert.assertThat;
 import org.junit.Assert;
 import org.junit.Test;
 
-import br.com.lemao.environment.environments.EnvironmentSampleDoNotExtendsEnvironment;
+import br.com.lemao.environment.environments.EnvironmentSampleDoesNotExtendsEnvironment;
+import br.com.lemao.environment.environments.EnvironmentSampleEnvironmentAnnotationAfterEnvironment;
+import br.com.lemao.environment.environments.EnvironmentSampleEnvironmentAnnotationAfterEnvironmentNotImplemented;
+import br.com.lemao.environment.environments.EnvironmentSampleEnvironmentAnnotationBeforeEnvironment;
+import br.com.lemao.environment.environments.EnvironmentSampleEnvironmentAnnotationBeforeEnvironmentNotImplemented;
 import br.com.lemao.environment.environments.EnvironmentSampleExtendsEnvironment;
 import br.com.lemao.environment.exception.EnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentHierarchyException;
@@ -28,12 +32,22 @@ public class EnvironmentExecutorRainyDayTest {
 	}
 	
 	@Test
+	public void shouldThrowEnvironmentNotImplementedExceptionForRunMethod() {
+		try {
+			EnvironmentExecutor.gimme().execute(EnvironmentSampleExtendsEnvironment.class);
+			Assert.fail("should throw an Exception");
+		} catch (Exception e) {
+			assertThat(e.getMessage(), is("Error trying to run environment >> EnvironmentSampleExtendsEnvironment.run"));
+		}
+	}
+	
+	@Test
 	public void shouldThrowEnvironmentHierarchyException() {
 		try {
-			EnvironmentExecutor.gimme().execute(EnvironmentSampleDoNotExtendsEnvironment.class);
+			EnvironmentExecutor.gimme().execute(EnvironmentSampleDoesNotExtendsEnvironment.class);
 			Assert.fail("should throw an EnvironmentHierarchyException");
 		} catch (EnvironmentHierarchyException e) {
-			assertThat(e.getMessage(), is("Missing 'extends Environment' or @Environment !? >> EnvironmentSampleDoNotExtendsEnvironment"));
+			assertThat(e.getMessage(), is("Missing 'extends Environment' or @Environment !? >> EnvironmentSampleDoesNotExtendsEnvironment"));
 		}
 	}
 	
@@ -45,6 +59,50 @@ public class EnvironmentExecutorRainyDayTest {
 		} catch (EnvironmentException e) {
 			assertThat(e.getCause().getClass().getSimpleName(), not(containsString("Environment")));
 			assertThat(e.getMessage(), is("Error trying to run environment >> EnvironmentSampleExtendsEnvironment.throwNonEnvironmentException"));
+		}
+	}
+	
+	@Test
+	public void shouldThrowEnvironmentExceptionOnExecuteBeforeEnvironmentMethodNotImplemented() {
+		try {
+			EnvironmentExecutor.gimme().execute(EnvironmentSampleEnvironmentAnnotationBeforeEnvironmentNotImplemented.class);
+			Assert.fail("should throw an EnvironmentException");
+		} catch (EnvironmentException e) {
+			assertThat(e.getCause().getClass().getSimpleName(), not(containsString("Environment")));
+			assertThat(e.getMessage(), is("Error trying to run before environment >> EnvironmentSampleEnvironmentAnnotationBeforeEnvironmentNotImplemented.beforeEnvironmentNotImplemented"));
+		}
+	}
+	
+	@Test
+	public void shouldThrowEnvironmentExceptionOnExecuteBeforeEnvironmentMethod() {
+		try {
+			EnvironmentExecutor.gimme().execute(EnvironmentSampleEnvironmentAnnotationBeforeEnvironment.class);
+			Assert.fail("should throw an EnvironmentException");
+		} catch (EnvironmentException e) {
+			assertThat(e.getCause().getClass().getSimpleName(), not(containsString("Environment")));
+			assertThat(e.getMessage(), is("Error trying to run before environment >> EnvironmentSampleEnvironmentAnnotationBeforeEnvironment.run"));
+		}
+	}
+	
+	@Test
+	public void shouldThrowEnvironmentExceptionOnExecuteAfterEnvironmentMethodNotImplemented() {
+		try {
+			EnvironmentExecutor.gimme().execute(EnvironmentSampleEnvironmentAnnotationAfterEnvironmentNotImplemented.class);
+			Assert.fail("should throw an EnvironmentException");
+		} catch (EnvironmentException e) {
+			assertThat(e.getCause().getClass().getSimpleName(), not(containsString("Environment")));
+			assertThat(e.getMessage(), is("Error trying to run after environment >> EnvironmentSampleEnvironmentAnnotationAfterEnvironmentNotImplemented.afterEnvironmentNotImplemented"));
+		}
+	}
+	
+	@Test
+	public void shouldThrowEnvironmentExceptionOnExecuteAfterEnvironmentMethod() {
+		try {
+			EnvironmentExecutor.gimme().execute(EnvironmentSampleEnvironmentAnnotationAfterEnvironment.class);
+			Assert.fail("should throw an EnvironmentException");
+		} catch (EnvironmentException e) {
+			assertThat(e.getCause().getClass().getSimpleName(), not(containsString("Environment")));
+			assertThat(e.getMessage(), is("Error trying to run after environment >> EnvironmentSampleEnvironmentAnnotationAfterEnvironment.run"));
 		}
 	}
 	

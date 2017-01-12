@@ -19,15 +19,11 @@ public class EnvironmentException extends RuntimeException {
 	}
 
 	private static String getMessage(String simpleMessage, Class<?> environmentClass) {
-		return getSimpleMessageOrDefault(simpleMessage) + " >> " + environmentClass.getSimpleName();
+		return simpleMessage + " >> " + environmentClass.getSimpleName();
 	}
 
 	private static String getMessage(String simpleMessage, Class<?> environmentClass, String environmentName) {
 		return getMessage(simpleMessage, environmentClass) + "." + environmentName;
 	}
 
-	private static String getSimpleMessageOrDefault(String simpleMessage) {
-		return simpleMessage == null ? MESSAGE_ERROR_TRYING_TO_RUN_ENVIRONMENT : simpleMessage;
-	}
-	
 }
