@@ -14,8 +14,8 @@ import org.junit.Test;
 import br.com.lemao.environment.Environment;
 import br.com.lemao.environment.annotation.GivenEnvironment;
 import br.com.lemao.environment.environments.BikerEnvironment;
-import br.com.lemao.environment.environments.OneMaleBikerAndOneBicycleForThisBiker;
-import br.com.lemao.environment.environments.TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBiker;
+import br.com.lemao.environment.environments.OneMaleBikerAndOneBicycleForThisBikerEnvironment;
+import br.com.lemao.environment.environments.TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBikerEnvironment;
 import br.com.lemao.environment.executor.EnvironmentExecutor;
 import br.com.lemao.environment.model.bicycle.Bicycle;
 import br.com.lemao.environment.model.bicycle.support.BicycleInMemorySupport;
@@ -33,7 +33,7 @@ public class EnvironmentExecutorTest {
 
 	@Test
 	public void oneBikerAndOneBicycleForThisBikerCreatedByEnvironment() {
-		EnvironmentExecutor.gimme().execute(OneMaleBikerAndOneBicycleForThisBiker.class);
+		EnvironmentExecutor.gimme().execute(OneMaleBikerAndOneBicycleForThisBikerEnvironment.class);
 		
 		List<Biker> bikers = BikerInMemorySupport.findAll();
 		assertThat(bikers.size(), is(1));
@@ -73,7 +73,7 @@ public class EnvironmentExecutorTest {
 
 	@Test
 	public void twoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBikerCreatedByEnvironment() {
-		EnvironmentExecutor.gimme().execute(TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBiker.class);
+		EnvironmentExecutor.gimme().execute(TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBikerEnvironment.class);
 		
 		List<Biker> bikers = BikerInMemorySupport.findAll();
 		assertThat(bikers.size(), is(2));
@@ -186,19 +186,17 @@ public class EnvironmentExecutorTest {
 	}
 	
 	private GivenEnvironment getAnnotationForOneMaleBikerAndOneBicycleForThisBiker() {
-		GivenEnvironment oneMaleBikerAndOneBicycleForThisBiker =
-		new GivenEnvironment() {
+		 return new GivenEnvironment() {
 			public Class<? extends Annotation> annotationType() {
 				return GivenEnvironment.class;
 			}
 			public Class<?> value() {
-				return OneMaleBikerAndOneBicycleForThisBiker.class;
+				return OneMaleBikerAndOneBicycleForThisBikerEnvironment.class;
 			}
 			public String environmentName() {
 				return Environment.DEFAULT_ENVIRONMENT_METHOD_NAME;
 			}
 		};
-		return oneMaleBikerAndOneBicycleForThisBiker;
 	}
 
 }

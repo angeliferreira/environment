@@ -5,7 +5,7 @@ import br.com.lemao.environment.model.bicycle.support.BicycleInMemorySupport;
 import br.com.lemao.environment.model.biker.Biker;
 import br.com.lemao.environment.model.biker.support.BikerInMemorySupport;
 
-public class OneMaleBikerAndOneBicycleForThisBiker extends AbstractBikerBicycleEnvironment {
+public class OneMaleBikerAndOneBicycleForThisBikerEnvironment extends AbstractBikerBicycleEnvironment {
 	
 	@Override
 	public void run() {

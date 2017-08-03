@@ -4,11 +4,14 @@ import static br.com.lemao.environment.Environment.DEFAULT_ENVIRONMENT_METHOD_NA
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import br.com.lemao.environment.Environment;
 import br.com.lemao.environment.annotation.AfterEnvironment;
 import br.com.lemao.environment.annotation.BeforeEnvironment;
 import br.com.lemao.environment.annotation.GivenEnvironment;
+import br.com.lemao.environment.annotation.GivenEnvironments;
 import br.com.lemao.environment.exception.AfterEnvironmentException;
 import br.com.lemao.environment.exception.BeforeEnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentException;
@@ -17,7 +20,11 @@ import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
 
 public class EnvironmentExecutor {
 	
-	private EnvironmentExecutor() {}
+	private Map<String, Boolean> executionMap;
+	
+	private EnvironmentExecutor() {
+		executionMap = new HashMap<String, Boolean>();
+	}
 	
 	public static EnvironmentExecutor gimme() {
 		return new EnvironmentExecutor();
@@ -27,11 +34,45 @@ public class EnvironmentExecutor {
 		execute(givenEnvironment.value(), givenEnvironment.environmentName());
 	}
 	
+	public void execute(GivenEnvironment... givenEnvironments) {
+		for (GivenEnvironment givenEnvironment : givenEnvironments) {
+			execute(givenEnvironment);
+		}
+	}
+	
+	public void execute(GivenEnvironments givenEnvironments) {
+		for (GivenEnvironment givenEnvironment : givenEnvironments.environments()) {
+			execute(givenEnvironment.value(), givenEnvironment.environmentName());
+		}
+	}
+	
 	public void execute(Class<?> environmentClass) {
 		execute(environmentClass, DEFAULT_ENVIRONMENT_METHOD_NAME);
 	}
+	
+	public void execute(Class<?>... environmentsClasses) {
+		for (Class<?> environmentClass : environmentsClasses) {
+			execute(environmentClass);
+		}
+	}
+	
+	public void execute(Object... environmentsDefinition) {
+		for (Object environmentDefinition : environmentsDefinition) {
+			if (environmentDefinition instanceof Class<?>) {
+				execute((Class<?>) environmentDefinition);
+			} else if (environmentDefinition instanceof GivenEnvironment) {
+				execute((GivenEnvironment) environmentDefinition);
+			} else {
+				throw new IllegalArgumentException("Environment definition not found to execute! -> " + environmentDefinition.getClass().getSimpleName());
+			}
+		}
+	}
 
 	public void execute(Class<?> environmentClass, String environmentName) {
+		if (isEnvironmentAlreadyExecuted(environmentClass, environmentName)) {
+			return;
+		}
+		
 		validateEnvironmentHierarchy(environmentClass);
 		try {
 			Method environmentMethod = environmentClass.getMethod(environmentName);
@@ -50,9 +91,23 @@ public class EnvironmentExecutor {
 			throw new EnvironmentException(environmentClass, environmentName, e);
 		} finally {
 			afterRun(environmentClass, environmentName);
+			computeExecution(environmentClass, environmentName);
 		}
 	}
 	
+	private boolean isEnvironmentAlreadyExecuted(Class<?> environmentClass, String environmentName) {
+		Boolean isEnvironmentAlreadyExecuted = executionMap.get(getEnvironmentSimpleName(environmentClass, environmentName));
+		return isEnvironmentAlreadyExecuted != null && isEnvironmentAlreadyExecuted;
+	}
+
+	private void computeExecution(Class<?> environmentClass, String environmentName) {
+		executionMap.put(getEnvironmentSimpleName(environmentClass, environmentName), true);
+	}
+
+	private String getEnvironmentSimpleName(Class<?> environmentClass, String environmentName) {
+		return environmentClass.getSimpleName() + "." + environmentName;
+	}
+
 	private void validateEnvironmentHierarchy(Class<?> environmentClass) {
 		if (!extendsEnvironment(environmentClass) && !isAnnotationPresent(environmentClass, br.com.lemao.environment.annotation.Environment.class)) {
 			throw new EnvironmentHierarchyException(environmentClass);
@@ -107,5 +162,5 @@ public class EnvironmentExecutor {
 	private Object getEnvironmentInstance(Class<?> environmentClass) throws InstantiationException, IllegalAccessException {
 		return environmentClass.newInstance();
 	}
-
+	
 }

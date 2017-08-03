@@ -1,7 +1,8 @@
 package br.com.lemao.environment.test.cucumber.cycling;
 
 import static org.junit.Assert.assertEquals;
-import br.com.lemao.environment.environments.OneMaleBikerAndOneBicycleForThisBiker;
+
+import br.com.lemao.environment.environments.OneMaleBikerAndOneBicycleForThisBikerEnvironment;
 import br.com.lemao.environment.executor.EnvironmentExecutor;
 import br.com.lemao.environment.model.bicycle.Bicycle;
 import br.com.lemao.environment.model.bicycle.support.BicycleInMemorySupport;
@@ -19,7 +20,7 @@ public class CyclingStep {
 
 	@Given("^I have one male biker and one bicycle for this biker$")
 	public void iHaveOneMaleBikerAndOneBicycleForThisBiker() throws Throwable {
-	    EnvironmentExecutor.gimme().execute(OneMaleBikerAndOneBicycleForThisBiker.class);
+	    EnvironmentExecutor.gimme().execute(OneMaleBikerAndOneBicycleForThisBikerEnvironment.class);
 	}
 
 	@When("^I read the attributes of the biker$")

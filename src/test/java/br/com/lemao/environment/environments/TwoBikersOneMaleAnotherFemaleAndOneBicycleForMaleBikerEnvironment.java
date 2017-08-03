@@ -7,10 +7,10 @@ import br.com.lemao.environment.model.bicycle.support.BicycleInMemorySupport;
 import br.com.lemao.environment.model.biker.Biker;
 import br.com.lemao.environment.model.biker.support.BikerInMemorySupport;
 
-public class TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBiker extends AbstractBikerBicycleEnvironment {
+public class TwoBikersOneMaleAnotherFemaleAndOneBicycleForMaleBikerEnvironment extends AbstractBikerBicycleEnvironment {
 	
 	@Override
-	@GivenEnvironment(OneMaleBikerAndOneBicycleForThisBiker.class)
+	@GivenEnvironment(OneMaleBikerAndOneBicycleForThisBikerEnvironment.class)
 	public void run() {
 		Biker oliviaBiker = oneBiker().withName("Olivia").female().gimme();
 		BikerInMemorySupport.persist(oliviaBiker);
