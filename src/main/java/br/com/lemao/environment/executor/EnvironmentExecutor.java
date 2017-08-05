@@ -3,6 +3,7 @@ package br.com.lemao.environment.executor;
 import static br.com.lemao.environment.Environment.DEFAULT_ENVIRONMENT_METHOD_NAME;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ import br.com.lemao.environment.annotation.GivenEnvironment;
 import br.com.lemao.environment.annotation.GivenEnvironments;
 import br.com.lemao.environment.exception.AfterEnvironmentException;
 import br.com.lemao.environment.exception.BeforeEnvironmentException;
+import br.com.lemao.environment.exception.CyclicDependencyEnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentHierarchyException;
 import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
@@ -69,29 +71,72 @@ public class EnvironmentExecutor {
 	}
 
 	public void execute(Class<?> environmentClass, String environmentName) {
+		validateCyclicDependency(environmentClass, environmentName);
 		if (isEnvironmentAlreadyExecuted(environmentClass, environmentName)) {
 			return;
 		}
-		
 		validateEnvironmentHierarchy(environmentClass);
+		computeForExecution(environmentClass, environmentName);
 		try {
-			Method environmentMethod = environmentClass.getMethod(environmentName);
-
-			GivenEnvironment environmentFather = environmentMethod.getAnnotation(GivenEnvironment.class);
-			if (environmentFather != null) execute(environmentFather.value(), environmentFather.environmentName());
-			
-			beforeRun(environmentClass, environmentName);
-			
-			environmentMethod.invoke(getEnvironmentInstance(environmentClass));
-		} catch (NoSuchMethodException e) {
-			throw new EnvironmentNotImplementedException(environmentClass, environmentName, e);
+			executeEnvironment(environmentClass, environmentName);
 		} catch (EnvironmentException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new EnvironmentException(environmentClass, environmentName, e);
+			throw new EnvironmentException(e);
 		} finally {
 			afterRun(environmentClass, environmentName);
-			computeExecution(environmentClass, environmentName);
+			computeExecuted(environmentClass, environmentName);
+		}
+	}
+
+	private void executeEnvironment(Class<?> environmentClass, String environmentName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+		Method environmentMethod = getEnvironmentMethod(environmentClass, environmentName);
+		if (environmentMethod != null) {
+			execute(environmentClass, environmentName, environmentMethod);
+			return;
+		}
+		executeMultiple(environmentClass, environmentName);
+	}
+
+	private void validateCyclicDependency(Class<?> environmentClass, String environmentName) {
+		if (isEnvironmentAlreadyForExecution(environmentClass, environmentName)) {
+			throw new CyclicDependencyEnvironmentException(environmentClass, environmentName);
+		}
+	}
+
+	private boolean isEnvironmentAlreadyForExecution(Class<?> environmentClass, String environmentName) {
+		Boolean isEnvironmentAlreadyExecuted = executionMap.get(getEnvironmentSimpleName(environmentClass, environmentName));
+		return isEnvironmentAlreadyExecuted != null && !isEnvironmentAlreadyExecuted;
+	}
+
+	private void computeForExecution(Class<?> environmentClass, String environmentName) {
+		executionMap.put(getEnvironmentSimpleName(environmentClass, environmentName), false);
+	}
+
+	private void executeMultiple(Class<?> environmentClass, String environmentName) {
+		GivenEnvironments givenEnvironments = environmentClass.getAnnotation(GivenEnvironments.class);
+		if (givenEnvironments == null) {
+			throw new EnvironmentNotImplementedException(environmentClass, environmentName);
+		}
+		execute(givenEnvironments);
+	}
+
+	private void execute(Class<?> environmentClass, String environmentName, Method environmentMethod) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+		GivenEnvironment environmentFather = environmentMethod.getAnnotation(GivenEnvironment.class);
+		if (environmentFather != null) {
+			execute(environmentFather.value(), environmentFather.environmentName());
+		}
+		
+		beforeRun(environmentClass, environmentName);
+		
+		environmentMethod.invoke(getEnvironmentInstance(environmentClass));
+	}
+
+	private Method getEnvironmentMethod(Class<?> environmentClass, String environmentName) throws NoSuchMethodException {
+		try {
+			return environmentClass.getDeclaredMethod(environmentName);
+		} catch (NoSuchMethodException e) {
+			return null;
 		}
 	}
 	
@@ -100,7 +145,7 @@ public class EnvironmentExecutor {
 		return isEnvironmentAlreadyExecuted != null && isEnvironmentAlreadyExecuted;
 	}
 
-	private void computeExecution(Class<?> environmentClass, String environmentName) {
+	private void computeExecuted(Class<?> environmentClass, String environmentName) {
 		executionMap.put(getEnvironmentSimpleName(environmentClass, environmentName), true);
 	}
 

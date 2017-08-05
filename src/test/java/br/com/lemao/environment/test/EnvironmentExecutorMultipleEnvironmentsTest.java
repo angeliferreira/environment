@@ -7,15 +7,14 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import br.com.lemao.environment.annotation.GivenEnvironment;
 import br.com.lemao.environment.annotation.GivenEnvironmentBuilder;
 import br.com.lemao.environment.annotation.GivenEnvironments;
-import br.com.lemao.environment.environments.BikerEnvironment;
 import br.com.lemao.environment.environments.multiple.OneFemaleBikerWithBicycleEnvironment;
 import br.com.lemao.environment.environments.multiple.OneMaleBikerWithBicycleEnvironment;
+import br.com.lemao.environment.environments.multiple.TwoBikersWithBicyclesEnvironment;
 import br.com.lemao.environment.executor.EnvironmentExecutor;
 import br.com.lemao.environment.model.bicycle.Bicycle;
 import br.com.lemao.environment.model.bicycle.support.BicycleInMemorySupport;
@@ -65,6 +64,13 @@ public class EnvironmentExecutorMultipleEnvironmentsTest {
 				.forClass(OneFemaleBikerWithBicycleEnvironment.class)
 				.gimme();
 		EnvironmentExecutor.gimme().execute(OneMaleBikerWithBicycleEnvironment.class, oneFemaleBikerWithBicycleEnvironment);
+		
+		assertTwoBikersWithBicycles();
+	}
+	
+	@Test
+	public void twoBikersWithBicyclesCreatedByEnvironmentAgregateEnvironments() {
+		EnvironmentExecutor.gimme().execute(TwoBikersWithBicyclesEnvironment.class);
 		
 		assertTwoBikersWithBicycles();
 	}

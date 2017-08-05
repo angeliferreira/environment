@@ -14,6 +14,10 @@ import br.com.lemao.environment.environments.EnvironmentSampleEnvironmentAnnotat
 import br.com.lemao.environment.environments.EnvironmentSampleEnvironmentAnnotationBeforeEnvironment;
 import br.com.lemao.environment.environments.EnvironmentSampleEnvironmentAnnotationBeforeEnvironmentNotImplemented;
 import br.com.lemao.environment.environments.EnvironmentSampleExtendsEnvironment;
+import br.com.lemao.environment.environments.multiple.A1EnvironmentDependsB1Environment;
+import br.com.lemao.environment.environments.multiple.B1EnvironmentDependsC1Environment;
+import br.com.lemao.environment.environments.multiple.C1EnvironmentDependsB1Environment;
+import br.com.lemao.environment.exception.CyclicDependencyEnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentHierarchyException;
 import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
@@ -35,8 +39,8 @@ public class EnvironmentExecutorRainyDayTest {
 	public void shouldThrowEnvironmentNotImplementedExceptionForRunMethod() {
 		try {
 			EnvironmentExecutor.gimme().execute(EnvironmentSampleExtendsEnvironment.class);
-			Assert.fail("should throw an Exception");
-		} catch (Exception e) {
+			Assert.fail("should throw an EnvironmentNotImplementedException");
+		} catch (EnvironmentNotImplementedException e) {
 			assertThat(e.getMessage(), is("Error trying to run environment >> EnvironmentSampleExtendsEnvironment.run"));
 		}
 	}
@@ -58,7 +62,7 @@ public class EnvironmentExecutorRainyDayTest {
 			Assert.fail("should throw an non environment Exception");
 		} catch (EnvironmentException e) {
 			assertThat(e.getCause().getClass().getSimpleName(), not(containsString("Environment")));
-			assertThat(e.getMessage(), is("Error trying to run environment >> EnvironmentSampleExtendsEnvironment.throwNonEnvironmentException"));
+			assertThat(e.getMessage(), is("java.lang.reflect.InvocationTargetException"));
 		}
 	}
 	
@@ -103,6 +107,16 @@ public class EnvironmentExecutorRainyDayTest {
 		} catch (EnvironmentException e) {
 			assertThat(e.getCause().getClass().getSimpleName(), not(containsString("Environment")));
 			assertThat(e.getMessage(), is("Error trying to run after environment >> EnvironmentSampleEnvironmentAnnotationAfterEnvironment.run"));
+		}
+	}
+	
+	@Test
+	public void shouldThrowCyclicDependencyException() {
+		try {
+			EnvironmentExecutor.gimme().execute(A1EnvironmentDependsB1Environment.class, B1EnvironmentDependsC1Environment.class, C1EnvironmentDependsB1Environment.class);
+			Assert.fail("should throw an CyclicDependencyException");
+		} catch (CyclicDependencyEnvironmentException e) {
+			assertThat(e.getMessage(), is("Error trying to run environment >> B1EnvironmentDependsC1Environment.run"));
 		}
 	}
 	

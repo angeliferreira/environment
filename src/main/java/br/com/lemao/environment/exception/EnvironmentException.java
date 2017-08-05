@@ -6,6 +6,14 @@ public class EnvironmentException extends RuntimeException {
 	
 	private static final String MESSAGE_ERROR_TRYING_TO_RUN_ENVIRONMENT = "Error trying to run environment";
 	
+	public EnvironmentException(Exception e) {
+		super(e);
+	}
+	
+	public EnvironmentException(String message) {
+		super(message);
+	}
+	
 	public EnvironmentException(Class<?> environmentClass, String environmentName, Exception e) {
 		super(getMessage(MESSAGE_ERROR_TRYING_TO_RUN_ENVIRONMENT, environmentClass, environmentName), e);
 	}
