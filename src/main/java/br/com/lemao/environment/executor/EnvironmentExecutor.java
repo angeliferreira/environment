@@ -21,43 +21,43 @@ import br.com.lemao.environment.exception.EnvironmentHierarchyException;
 import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
 
 public class EnvironmentExecutor {
-	
+
 	private Map<String, Boolean> executionMap;
-	
+
 	private EnvironmentExecutor() {
 		executionMap = new HashMap<String, Boolean>();
 	}
-	
+
 	public static EnvironmentExecutor gimme() {
 		return new EnvironmentExecutor();
 	}
-	
+
 	public void execute(GivenEnvironment givenEnvironment) {
 		execute(givenEnvironment.value(), givenEnvironment.environmentName());
 	}
-	
+
 	public void execute(GivenEnvironment... givenEnvironments) {
 		for (GivenEnvironment givenEnvironment : givenEnvironments) {
 			execute(givenEnvironment);
 		}
 	}
-	
+
 	public void execute(GivenEnvironments givenEnvironments) {
 		for (GivenEnvironment givenEnvironment : givenEnvironments.environments()) {
 			execute(givenEnvironment.value(), givenEnvironment.environmentName());
 		}
 	}
-	
+
 	public void execute(Class<?> environmentClass) {
 		execute(environmentClass, DEFAULT_ENVIRONMENT_METHOD_NAME);
 	}
-	
+
 	public void execute(Class<?>... environmentsClasses) {
 		for (Class<?> environmentClass : environmentsClasses) {
 			execute(environmentClass);
 		}
 	}
-	
+
 	public void execute(Object... environmentsDefinition) {
 		for (Object environmentDefinition : environmentsDefinition) {
 			if (environmentDefinition instanceof Class<?>) {
@@ -122,13 +122,16 @@ public class EnvironmentExecutor {
 	}
 
 	private void execute(Class<?> environmentClass, String environmentName, Method environmentMethod) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-		GivenEnvironment environmentFather = environmentMethod.getAnnotation(GivenEnvironment.class);
-		if (environmentFather != null) {
-			execute(environmentFather.value(), environmentFather.environmentName());
+		GivenEnvironment givenEnvironmentFather = environmentMethod.getAnnotation(GivenEnvironment.class);
+		GivenEnvironments givenEnvironmentsFather = environmentMethod.getAnnotation(GivenEnvironments.class);
+		if (givenEnvironmentFather != null) {
+			execute(givenEnvironmentFather.value(), givenEnvironmentFather.environmentName());
+		} else if (givenEnvironmentsFather != null) {
+		    execute(givenEnvironmentsFather);
 		}
-		
+
 		beforeRun(environmentClass, environmentName);
-		
+
 		environmentMethod.invoke(getEnvironmentInstance(environmentClass));
 	}
 
@@ -139,7 +142,7 @@ public class EnvironmentExecutor {
 			return null;
 		}
 	}
-	
+
 	private boolean isEnvironmentAlreadyExecuted(Class<?> environmentClass, String environmentName) {
 		Boolean isEnvironmentAlreadyExecuted = executionMap.get(getEnvironmentSimpleName(environmentClass, environmentName));
 		return isEnvironmentAlreadyExecuted != null && isEnvironmentAlreadyExecuted;
@@ -186,7 +189,7 @@ public class EnvironmentExecutor {
 			throw new BeforeEnvironmentException(environmentClass, environmentName, e);
 		}
 	}
-	
+
 	private void afterRun(Class<?> environmentClass, String environmentName) {
 		AfterEnvironment afterEnvironment = null;
 		try {
@@ -203,9 +206,9 @@ public class EnvironmentExecutor {
 			throw new AfterEnvironmentException(environmentClass, environmentName, e);
 		}
 	}
-	
+
 	private Object getEnvironmentInstance(Class<?> environmentClass) throws InstantiationException, IllegalAccessException {
 		return environmentClass.newInstance();
 	}
-	
+
 }
