@@ -19,17 +19,25 @@ import br.com.lemao.environment.exception.CyclicDependencyEnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentException;
 import br.com.lemao.environment.exception.EnvironmentHierarchyException;
 import br.com.lemao.environment.exception.EnvironmentNotImplementedException;
+import br.com.lemao.environment.factory.EnvironmentFactory;
+import br.com.lemao.environment.factory.EnvironmentReflectionFactory;
 
 public class EnvironmentExecutor {
 
 	private Map<String, Boolean> executionMap;
+	private EnvironmentFactory environmentFactory;
 
-	private EnvironmentExecutor() {
-		executionMap = new HashMap<String, Boolean>();
+	private EnvironmentExecutor(EnvironmentFactory environmentFactory) {
+		this.executionMap = new HashMap<String, Boolean>();
+		this.environmentFactory = environmentFactory;
 	}
 
 	public static EnvironmentExecutor gimme() {
-		return new EnvironmentExecutor();
+		return new EnvironmentExecutor(new EnvironmentReflectionFactory());
+	}
+	
+	public static EnvironmentExecutor gimme(EnvironmentFactory environmentFactory) {
+		return new EnvironmentExecutor(environmentFactory);
 	}
 
 	public void execute(GivenEnvironment givenEnvironment) {
@@ -208,7 +216,7 @@ public class EnvironmentExecutor {
 	}
 
 	private Object getEnvironmentInstance(Class<?> environmentClass) throws InstantiationException, IllegalAccessException {
-		return environmentClass.newInstance();
+		return environmentFactory.create(environmentClass);
 	}
 
 }
