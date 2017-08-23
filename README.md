@@ -152,9 +152,10 @@ The use of the Environment is through *@GivenEnvironment* annotation. Its name w
 
 The annotation *@GivenEnvironment* tells which structure will be executed before the test method. In the case of the annotation be in a test class, all tests that are NOT annotated with *@GivenEnvironment* or *@IgnoreEnvironment* will be executed after the execution of the Environment structure.
 
-The GivenEnvironment annotation supports two basic uses.
+The GivenEnvironment annotation supports some basic uses.
 
-The first use you only have to pass as parameter the Environment class which has a run() method, structure Environment per class.
+#### Environment per class
+You only have to pass as parameter the Environment class which has a run() method.
 
 Its use in a test case would be as follows:
 
@@ -182,7 +183,8 @@ public class Sample {
 }
 ```
 
-The second use you have to pass as parameter the Environment class and the Environment method, structure Environment per method.
+#### Environment per method
+You only have to pass as parameter the Environment class and the Environment method.
 
 Its use in a test case would be as follows:
 
@@ -210,6 +212,167 @@ public class Sample {
 }
 ```
 
+### @GivenEnvironments annotation
+
+As *@GivenEnvironment*, the annotation *@GivenEnvironments* supports multiples *@GivenEnvironment*. It can be used to group Environments.
+
+The GivenEnvironments annotation supports some basic uses.
+
+#### Multiple Environments per class
+You only have to pass as parameter the Environment classes which has a run() method.
+
+Its use in a test case would be as follows:
+
+```java
+public class Sample {
+
+   @Test
+   @GivenEnvironments(environments = {
+      @GivenEnvironment(EnvironmentSample.class),
+      @GivenEnvironment(EnvironmentAnotherSample.class)
+   })
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+
+}
+```
+or 
+```java
+@GivenEnvironments(environments = {
+   @GivenEnvironment(EnvironmentSample.class),
+   @GivenEnvironment(EnvironmentAnotherSample.class)
+})
+public class Sample {
+
+   @Test
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+
+}
+```
+
+#### Multiple Environments per method
+You only have to pass as parameter the Environment classes and the Environment methods.
+
+Its use in a test case would be as follows:
+
+```java
+public class Sample {
+
+   @Test
+   @GivenEnvironments(environments = {
+      @GivenEnvironment(value=EnvironmentSample.class, environmentName="myEnvironmentMethodNameOneSample"),
+      @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+   })
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+
+}
+```
+or
+```java
+@GivenEnvironments(environments = {
+   @GivenEnvironment(value=EnvironmentSample.class, environmentName="myEnvironmentMethodNameOneSample"),
+   @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+})
+public class Sample {
+
+   @Test
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+
+}
+```
+
+#### Hybrid Multiple Environments
+You can pass as parameter either Environments per class or Environmets per method.
+
+Its use in a test case would be as follows:
+
+```java
+public class Sample {
+
+   @Test
+   @GivenEnvironments(environments = {
+      @GivenEnvironment(EnvironmentSample.class),
+      @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+   })
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+
+}
+```
+or
+```java
+@GivenEnvironments(environments = {
+   @GivenEnvironment(EnvironmentSample.class),
+   @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+})
+public class Sample {
+
+   @Test
+   public void method() {
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+
+}
+```
+
+#### Group Multiple Environments
+You can pass as parameter either Environments per class or Environmets per method.
+
+Its use in a test case would be as follows:
+
+```java
+@GivenEnvironments(environments = {
+   @GivenEnvironment(EnvironmentSample.class),
+   @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+})
+public class AgregateSampleEnvironment extends Environment {
+
+}
+```
+or
+```java
+public class AgregateSampleEnvironment extends Environment {
+
+   @GivenEnvironments(environments = {
+      @GivenEnvironment(EnvironmentSample.class),
+      @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+   })
+   @Override
+   public void run() {}
+}
+```
+or
+```java
+@Environment
+@GivenEnvironments(environments = {
+   @GivenEnvironment(EnvironmentSample.class),
+   @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+})
+public class AgregateSampleEnvironment {
+
+}
+```
+or
+```java
+@Environment
+public class AgregateSampleEnvironment {
+
+   @GivenEnvironments(environments = {
+      @GivenEnvironment(EnvironmentSample.class),
+      @GivenEnvironment(value=EnvironmentAnotherSample.class, environmentName="myEnvironmentMethodNameAnotherSample")
+   })
+   public void run() {}
+}
+```
+
 ## Executing your Environments
 
 The only thing you have to do is get an EnvironmentExecutor and execute!
@@ -219,14 +382,54 @@ public class Sample {
 
    @Test
    public void method() {
-      EnvironmentExecutor.gimme().execute(EnvironmentSample.class); //It expects the method EnvironmentSample.run() to be implemented
-	  org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+      //It expects the method EnvironmentSample.run() to be implemented
+      EnvironmentExecutor.gimme().execute(EnvironmentSample.class);
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+   
+   @Test
+   public void method1() {
+      //It expects to exists the method EnvironmentSample.environmentSampleMethodName()
+      EnvironmentExecutor.gimme().execute(EnvironmentSample.class, "environmentSampleMethodName");
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
    }
    
    @Test
    public void method2() {
-      EnvironmentExecutor.gimme().execute(EnvironmentSample.class, "environmentSampleMethodName"); //It expects to exists the method EnvironmentSample.environmentSampleMethodName()
-	  org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+      //It expects the method EnvironmentSample.run() and EnvironmentAnotherSample.run() to be implemented
+      EnvironmentExecutor.gimme().execute(EnvironmentSample.class, EnvironmentAnotherSample.class);
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+   
+   @Test
+   public void method3() {
+      GivenEnvironment environmentSample = GivenEnvironmentBuilder.getInstance()
+         .forClass(EnvironmentSample.class)
+         .gimme();
+      GivenEnvironment environmentAnotherSample = GivenEnvironmentBuilder.getInstance()
+          .forClass(EnvironmentAnotherSample.class)
+          .gimme();
+      EnvironmentExecutor.gimme().execute(environmentSample, environmentAnotherSample);
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+   
+   @Test
+   public void method4() {
+      GivenEnvironment environmentAnotherSample = GivenEnvironmentBuilder.getInstance()
+          .forClass(EnvironmentAnotherSample.class)
+          .gimme();
+      EnvironmentExecutor.gimme().execute(EnvironmentSample.class, environmentAnotherSample);
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
+   }
+   
+   @Test
+   public void method5() {
+      GivenEnvironment environmentAnotherSample = GivenEnvironmentBuilder.getInstance()
+          .forClass(EnvironmentAnotherSample.class)
+	  .forName("environmentAnotherSampleMethodName")
+          .gimme();
+      EnvironmentExecutor.gimme().execute(EnvironmentSample.class, environmentAnotherSample);
+      org.junit.Assert.assertFalse(SampleUtil.findAll().isEmpty());
    }
 
 }
