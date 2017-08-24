@@ -35,7 +35,7 @@ public class EnvironmentExecutor {
 	public static EnvironmentExecutor gimme() {
 		return new EnvironmentExecutor(new EnvironmentReflectionFactory());
 	}
-	
+
 	public static EnvironmentExecutor gimme(EnvironmentFactory environmentFactory) {
 		return new EnvironmentExecutor(environmentFactory);
 	}
@@ -130,8 +130,9 @@ public class EnvironmentExecutor {
 	}
 
 	private void execute(Class<?> environmentClass, String environmentName, Method environmentMethod) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-		GivenEnvironment givenEnvironmentFather = environmentMethod.getAnnotation(GivenEnvironment.class);
-		GivenEnvironments givenEnvironmentsFather = environmentMethod.getAnnotation(GivenEnvironments.class);
+	    GivenEnvironment givenEnvironmentFather = getAnnotation(GivenEnvironment.class, environmentMethod, environmentClass);
+	    GivenEnvironments givenEnvironmentsFather = getAnnotation(GivenEnvironments.class, environmentMethod, environmentClass);
+
 		if (givenEnvironmentFather != null) {
 			execute(givenEnvironmentFather.value(), givenEnvironmentFather.environmentName());
 		} else if (givenEnvironmentsFather != null) {
@@ -142,6 +143,14 @@ public class EnvironmentExecutor {
 
 		environmentMethod.invoke(getEnvironmentInstance(environmentClass));
 	}
+
+	private <T extends Annotation> T getAnnotation(Class<T> annotationType, Method environmentMethod, Class<?> environmentClass) {
+	    T annotation = environmentMethod.getAnnotation(annotationType);
+
+	    if (annotation != null) return annotation;
+
+	    return environmentClass.getAnnotation(annotationType);
+    }
 
 	private Method getEnvironmentMethod(Class<?> environmentClass, String environmentName) throws NoSuchMethodException {
 		try {
